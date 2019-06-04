@@ -1,0 +1,30 @@
+{
+	"patent":{
+			"publish":{
+				"old_root":"s220ftp.tipo.gov.tw",
+				"old":"PatentIsuRegSpecXMLA",
+				"new_root":"s220ftp2.tipo.gov.tw",
+				"new":"PatentIsuRegSpecXMLA"			
+			},
+			"guide":{
+				"old_root":"s220ftp.tipo.gov.tw",
+				"old":"/PatentPubXML",
+				"new_root":"s220ftp2.tipo.gov.tw",
+				"new":"/PatentPubXML"	
+			}
+		},
+	"invention":{
+			"publish":{
+				"old_root":"ftp://s220ftp.tipo.gov.tw",
+				"old":"/PatentPubRegXMLA",
+				"new_root":"ftp://s220ftp2.tipo.gov.tw",
+				"new":"/PatentPubRegXMLA"			
+			},
+			"guide":{
+				"old_root":"ftp://s220ftp.tipo.gov.tw",
+				"old":"/InventionPubXML",
+				"new_root":"ftp://s220ftp2.tipo.gov.tw",
+				"new":"/InventionPubXML"	
+			}
+	}
+}

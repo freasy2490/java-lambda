@@ -1,0 +1,28 @@
+package com.amazonaws.lambda.demo;
+
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+public class LambdaFunctionHandler implements RequestHandler<Object, String> {
+
+    @Override
+    public String handleRequest(JSONObject input, Context context) {
+        SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+//            Employee employee = new Employee();
+//            employee.setId(request.id);
+//            employee.setName(request.name);
+//            session.save(employee);
+            session.getTransaction().commit();
+        }
+        context.getLogger().log("Input: " + input);
+
+        // TODO: implement your handler
+        return "Hello from Lambda!";
+    }
+
+}

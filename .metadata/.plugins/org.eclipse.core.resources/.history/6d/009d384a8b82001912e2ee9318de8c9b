@@ -1,0 +1,122 @@
+package com.amazonaws.lambda.demo;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSessionContext;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+public class CallTipoAPI {
+
+	private final static String USER_AGENT = "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36";
+	public String patent_no = "";
+	public String case_type = "IP_BUL";
+	public String public_date = "";
+	public String apply_no = "";
+	public String apply_date = "";
+	public String patent_name = "";
+	public String inventors = "";
+	public String agents = "";
+	public String applicants = "";
+
+	public CallTipoAPI(String API, String applnum) throws Exception {
+		String response = sendGet(API, applnum);
+		String patent_type="";
+		JSONObject jsonObject = new JSONObject(response);
+		if(API=="1") {
+			patent_type="I";
+		}else {
+			patent_type="M";
+		}
+		
+			JSONObject tw_patent_rights = jsonObject.getJSONObject("tw-patent-rights"+patent_type);
+			JSONArray patentcontent = (JSONArray) tw_patent_rights.get("patentcontent");
+			JSONObject content = patentcontent.getJSONObject(0);
+			patent_no = content.getJSONObject("patent-right").getString("patent-no");
+			public_date = content.getJSONObject("publication-reference").getString("publish-date");
+			apply_no = applnum;
+			apply_date = content.getJSONObject("application-reference").getString("appl-date");
+			patent_name = content.getJSONObject("patent-title").getString("patent-name-chinese");
+			JSONObject parties = content.getJSONObject("parties");
+			JSONArray app = parties.getJSONArray("applicants");
+			for (int i = 0; i < app.length(); i++) {
+				applicants += getJsonsmart(app.getJSONObject(i), "chinese-name") + " ";
+				applicants += getJsonsmart(app.getJSONObject(i), "english-name");
+				applicants += ";";
+			}
+			JSONArray inv = parties.getJSONArray("inventors");
+			for (int i = 0; i < inv.length(); i++) {
+				inventors += getJsonsmart(inv.getJSONObject(i), "chinese-name") + " ";
+				inventors += getJsonsmart(inv.getJSONObject(i), "english-name");
+				inventors += ";";
+			}
+			JSONArray age = parties.getJSONArray("agents");
+			for (int i = 0; i < age.length(); i++) {
+				agents += getJsonsmart(age.getJSONObject(i), "chinese-name") + " ";
+				agents += getJsonsmart(age.getJSONObject(i), "english-name");
+				agents += ";";
+			}
+		
+	}
+
+	// HTTP GET request
+	private static String sendGet(String API, String applnum) throws Exception {
+		HostnameVerifier hv = new HostnameVerifier() {
+			public boolean verify(String urlHostName, SSLSession session) {
+				return true;
+			}
+		};
+		javax.net.ssl.TrustManager[] trustAllCerts = { new TrustAllTrustManager() };
+		SSLContext sc = SSLContext.getInstance("SSL");
+		SSLSessionContext sslsc = sc.getServerSessionContext();
+		sslsc.setSessionTimeout(0);
+		sc.init(null, trustAllCerts, null);
+		HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		HttpsURLConnection.setDefaultHostnameVerifier(hv);
+//"http://tiponet.tipo.gov.tw/OpenDataApi/OpenData/API/PatentRights?format=json&orderby=appl-no&tk=ggT4gWtb&applclass="+API+"&applno="+applnum;
+		String url = "https://tiponet.tipo.gov.tw/OpenDataApi/OpenData/API/PatentRights?format=json&orderby=appl-no&tk=ggT4gWtb&applclass="+API+"&top=5000&applno="+applnum;
+
+		URL obj = new URL(url);
+		HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
+
+		// optional default is GET
+		con.setRequestMethod("GET");
+
+		// add request header
+		con.setRequestProperty("User-Agent", USER_AGENT);
+
+		int responseCode = con.getResponseCode();
+		System.out.println("\nSending 'GET' request to URL : " + url);
+		System.out.println("Response Code : " + responseCode);
+
+		BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		in.close();
+
+		// print result
+		System.out.println(response.toString());
+		return response.toString();
+
+	}
+
+	private String getJsonsmart(JSONObject jo, String key) {
+		if (jo.isNull(key)) {
+			return "";
+		}
+		return jo.getString(key);
+	}
+
+}

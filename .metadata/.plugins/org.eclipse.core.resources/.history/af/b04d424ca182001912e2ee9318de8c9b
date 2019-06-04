@@ -1,0 +1,83 @@
+package com.amazonaws.lambda.demo;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+public class CallTipoAPI {
+	private final static String USER_AGENT = "Mozilla/5.0";
+	public String patent_no="";
+	public String case_type="IP_BUL";
+	public String public_date="";
+	public String apply_no="";
+	public String apply_date="";
+	public String patent_name="";
+	public String inventors="";
+	public String agents="";
+	public String applicants="";
+
+	public CallTipoAPI(String API,String applnum) throws Exception {
+		String response=sendGet(API,applnum);
+	    JSONObject jsonObject = new JSONObject(response);
+	    JSONObject tw_patent_rights =  jsonObject.getJSONObject("tw-patent-rightsM");
+	    JSONArray patentcontent = (JSONArray) tw_patent_rights.get("patentcontent");
+	    JSONObject content=patentcontent.getJSONObject(0);
+	    patent_no=content.getJSONObject("patent-right").getString("patent-no");
+	    public_date=content.getJSONObject("publication-reference").getString("publish-date");
+		apply_no=applnum;
+	    apply_date=content.getJSONObject("publication-reference").getString("appl-date");
+	    patent_name=content.getJSONObject("patent-title").getString("patent-name-chinese");
+	    JSONObject parties=content.getJSONObject("parties");
+	    JSONArray app=parties.getJSONArray("applicants");
+	    for(int i=0;i<app.length();i++) {
+	    	applicants+=app.getJSONObject(i).getString("chinese-name")+" ";
+	    	applicants+=app.getJSONObject(i).getString("english-name")+";";
+	    }
+	    JSONArray inv=parties.getJSONArray("inventors");
+	    for(int i=0;i<inv.length();i++) {
+	    	inventors+=inv.getJSONObject(i).getString("chinese-name")+" ";
+	    	inventors+=inv.getJSONObject(i).getString("english-name")+";";
+	    }
+	    JSONArray age=parties.getJSONArray("agents");
+	    for(int i=0;i<age.length();i++) {
+	    	agents+=age.getJSONObject(i).getString("chinese-name")+" ";
+	    	agents+=age.getJSONObject(i).getString("english-name")+";";
+	    }
+	}
+
+	// HTTP GET request
+	private static String sendGet(String API,String applnum) throws Exception {
+
+		String url = "https://tiponet.tipo.gov.tw/OpenDataApi/OpenData/API/PatentRights?format=json&orderby=appl-no&tk=ggT4gWtb&applclass="+API+"&applno="+applnum;
+		
+		URL obj = new URL(url);
+		HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+		// optional default is GET
+		con.setRequestMethod("GET");
+
+		//add request header
+		con.setRequestProperty("User-Agent", USER_AGENT);
+
+		int responseCode = con.getResponseCode();
+		System.out.println("\nSending 'GET' request to URL : " + url);
+		System.out.println("Response Code : " + responseCode);
+
+		BufferedReader in = new BufferedReader(
+		        new InputStreamReader(con.getInputStream()));
+		String inputLine;
+		StringBuffer response = new StringBuffer();
+
+		while ((inputLine = in.readLine()) != null) {
+			response.append(inputLine);
+		}
+		in.close();
+
+		//print result
+		System.out.println(response.toString());
+		return inputLine;
+
+	}
+}

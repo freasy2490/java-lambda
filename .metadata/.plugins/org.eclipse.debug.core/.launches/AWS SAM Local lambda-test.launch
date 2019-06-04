@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.amazonaws.eclipse.lambda.launching.samLocal">
+    <stringAttribute key="project" value="lambda-test"/>
+</launchConfiguration>

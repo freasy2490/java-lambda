@@ -1,0 +1,70 @@
+package example;
+import com.amazonaws.services.lambda.runtime.Context; 
+import com.amazonaws.services.lambda.runtime.LambdaLogger;
+
+import java.io.FileInputStream;
+import java.net.URL;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import com.jcabi.*;
+import com.jcabi.xml.XMLDocument;
+
+public class Hello {
+    public static void main(String[] args) throws Exception {
+    	System.out.print("gogogo");
+    	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    	DocumentBuilder db = dbf.newDocumentBuilder();
+    	
+    	Document doc = db.parse(new FileInputStream("C://Users/Michael/Downloads/index.xml"));
+//    	Document doc = db.parse(new URL("ftp://s220ftp2.tipo.gov.tw/PatentIsuRegSpecXMLA/107/PatentIsuRegSpecXMLA_045018/index.xml").openStream());
+
+    	NodeList nl= doc.getElementsByTagName("tw-patent-grant");
+    	for(int i=0;i<nl.getLength();i++) {
+    		Node node=nl.item(i);
+    		System.out.println("\n This Element:"+node.getNodeName());
+    		if(node.getNodeType()==Node.ELEMENT_NODE) {
+    			Element e=(Element) node;
+    			System.out.println("  this certificate-number=>"+e.getAttribute("certificate-number"));
+    			System.out.println("  this inventors=>"+new XMLDocument(elementOftag(e,"inventors")).toString());
+    			System.out.println("  this date=>"+new XMLDocument(elementOftag( (Element) ((Element) e.getElementsByTagName("priority-claims")).getElementsByTagName("priority-claim"),"date")).toString());
+//application-reference
+//    			System.out.println("  this doc-number=>"+new XMLDocument(elementOftag((Element) e.getElementsByTagName("publication-reference").item(0).getFirstChild(),"doc-number")).toString());
+
+    		}
+    	}
+//        XPath xpath = XPathFactory.newInstance().newXPath();
+//        Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse("ftp://s220ftp2.tipo.gov.tw/PatentIsuRegSpecXMLA/107/PatentIsuRegSpecXMLA_045018/index.xml");
+//        String version = xpath.evaluate("//behavior/@version", doc);
+//        System.out.println(version);
+    	/**TransformerFactory transformerFactory= TransformerFactory.newInstance();
+    	Transformer xform = transformerFactory.newTransformer();
+    	xform.transform(new DOMSource(doc), new StreamResult(System.out));**/
+    }
+    private static Element elementOftag(Element e,String tname) throws ParserConfigurationException {
+    	if(e==null) {
+        	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        	DocumentBuilder db = dbf.newDocumentBuilder();
+        	Element temp=db.newDocument().createElement("");
+    		return temp;
+    	}
+    	Element res=(Element) e.getElementsByTagName(tname).item(0);
+    	return res;
+    }
+    public String myHandler(int myCount, Context context) {
+        LambdaLogger logger = context.getLogger();
+        logger.log("received : " + myCount);
+        return String.valueOf(myCount);
+    }
+}

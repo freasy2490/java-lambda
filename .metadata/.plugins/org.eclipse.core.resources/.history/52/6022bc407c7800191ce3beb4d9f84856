@@ -1,0 +1,206 @@
+package com.amazonaws.lambda.demo;
+
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.net.SocketException;
+import java.net.URL;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
+import org.apache.commons.net.ftp.FTPFile;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import com.jcabi.xml.XMLDocument;
+
+public class LambdaFunctionHandler implements RequestHandler<Object, String> {
+
+    @Override
+    public String handleRequest(Object input, Context context) {
+        context.getLogger().log("Input: " + input);
+
+//    	String res="";
+//    	String[] pub_type=new String[2];
+//    	pub_type[0]="pat";
+//    	pub_type[1]="pub";
+//    	for(int i=0;i<pub_type.length;i++) {
+//    		get_url(pub_type[i]);
+//    	}
+        String[] types= new String[2];
+        types[0]="PatentIsuRegSpecXMLA";
+        types[1]="PatentPubXML";
+        FTPClient ftpClient = new FTPClient();
+        try {
+			ftpClient.connect("s220ftp2.tipo.gov.tw", 21);
+			System.out.print("connect success\n");
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        try {
+			ftpClient.login("anonymous", "");
+			System.out.print("login success\n");
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+         
+        // lists files and directories in the current working directory
+        FTPFile[] years = null;
+		try {
+			years = ftpClient.listDirectories("PatentPubXML");
+			System.out.print("list success\n");
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+         
+        // iterates over the files and prints details for each
+        System.out.print(years.length);
+        for(String t:types) {
+        	for (FTPFile y : years) {
+                String yr = y.getName();
+                FTPFile[] files = null;
+                try {
+    				files=ftpClient.listFiles(t+"/"+yr);
+                    for(FTPFile f:files) {
+                        System.out.println(f.getName());
+                    }
+    			} catch (IOException e) {
+    				// TODO Auto-generated catch block
+    				e.printStackTrace();
+    			}
+
+//                if (file.isDirectory()) {
+//                    details = "[" + details + "]";
+//                }
+//                details += "\t\t" + file.getSize();
+//                details += "\t\t" + dateFormater.format(file.getTimestamp().getTime());
+            }
+        }
+        
+         
+        try {
+			ftpClient.logout();
+			System.out.print("logout success\n");
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        try {
+			ftpClient.disconnect();
+			System.out.print("disconnect success\n");
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+        return "Hello from Lambda!";
+        
+    }
+
+//    private void process_serial() {
+//    	
+//    }
+//    private void process_xml(String url) {
+//www
+//    	System.out.print("gogogo");
+//    	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+//    	DocumentBuilder db = null ;
+//		try {
+//			db = dbf.newDocumentBuilder();
+//		} catch (ParserConfigurationException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//    	
+//    	Document doc = null;
+//		try {
+////			doc = db.parse(new FileInputStream("C://Users/Michael/Downloads/index.xml"));
+//	    	doc = db.parse(new URL("ftp://s220ftp2.tipo.gov.tw/PatentIsuRegSpecXMLA/107/PatentIsuRegSpecXMLA_045018/index.xml").openStream());
+//
+//		} catch (FileNotFoundException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (SAXException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (IOException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//
+//    	NodeList nl= doc.getElementsByTagName("tw-patent-grant");
+//    	for(int i=0;i<nl.getLength();i++) {
+//    		Node node=nl.item(i);
+//    		System.out.println("\n This Element:"+node.getNodeName());
+//    		if(node.getNodeType()==Node.ELEMENT_NODE) {
+//    			Element e=(Element) node;
+//    			System.out.println("  this certificate-number=>"+e.getAttribute("certificate-number"));
+//    			try {
+//					System.out.println("  this inventors=>"+new XMLDocument(elementOftag(e,"inventors")).toString());
+//	    			System.out.println("  this PUBLIC_DATE=>"+new XMLDocument(elementOftag(e,"date")).toString());
+////	    			System.out.println("  this APPLY_NO=>"+new XMLDocument(elementOftag(e,"doc-number",false)).toString());
+//	    			System.out.println("  this APPLY_DATE=>"+new XMLDocument(elementOftag(e,"doc-number")).toString());
+//	    			System.out.println("  this AGENT=>"+new XMLDocument(elementOftag(e,"agents")).toString());
+//	    			System.out.println("  this APPLYER=>"+new XMLDocument(elementOftag(e,"applicants")).toString());
+//				} catch (NullPointerException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				} catch (ParserConfigurationException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+//    		}
+//    	}
+//    }
+    private Element elementOftag(Element ele,String tname) throws ParserConfigurationException,NullPointerException {
+    	NodeList tmp=ele.getElementsByTagName(tname);
+    	if(tmp.getLength()>0){
+        	Element res=(Element) tmp.item(tmp.getLength()-1);
+        	return res;
+    	}
+    	DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    	DocumentBuilder db = dbf.newDocumentBuilder();
+    	Element res=db.newDocument().createElement("not_provided");
+		return res;
+
+    }
+    
+}

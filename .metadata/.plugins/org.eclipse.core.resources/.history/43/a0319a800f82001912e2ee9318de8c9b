@@ -1,0 +1,32 @@
+package com.amazonaws.lambda.demo;
+
+public class TrustAllTrustManager implements javax.net.ssl.TrustManager, javax.net.ssl.X509TrustManager {
+
+    public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+        return null;
+    }
+
+    public boolean isServerTrusted(java.security.cert.X509Certificate[] certs) {
+        return true;
+    }
+
+    public boolean isClientTrusted(java.security.cert.X509Certificate[] certs) {
+        return true;
+    }
+
+    public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType)
+            throws java.security.cert.CertificateException {
+        return;
+    }
+
+    public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType)
+            throws java.security.cert.CertificateException {
+        return;
+    }
+
+}
+--------------------- 
+作者：蚁方阵 
+来源：CSDN 
+原文：https://blog.csdn.net/yiifaa/article/details/73148665 
+版权声明：本文为博主原创文章，转载请附上博文链接！

@@ -1,0 +1,31 @@
+package com.amazonaws.lambda.demo;
+
+import com.amazonaws.services.lambda.runtime.Context;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+
+public class LambdaFunctionHandler implements RequestHandler<Object, String> {
+
+    @Override
+    public String handleRequest(Object input, Context context) {
+        context.getLogger().log("Input: " + input);
+
+        return "Hello from Lambda!";
+    }
+private CallTipoAPI getpublic() {
+    CallTipoAPI res=null;
+    try {
+		res=new CallTipoAPI("2","102205969");
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+    // TODO: implement your handler
+    System.out.print(res.patent_no+"\n");
+    System.out.print(res.case_type+"\n");
+    System.out.print(res.public_date+"\n");
+    System.out.print(res.inventors+"\n");
+    System.out.print(res.agents+"\n");
+    System.out.print(res.applicants+"\n");
+
+return res;
+}
+}
