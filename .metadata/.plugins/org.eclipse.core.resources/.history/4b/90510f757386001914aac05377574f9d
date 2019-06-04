@@ -180,7 +180,6 @@ public class LambdaFunctionHandler implements RequestHandler<Object, String> {
     	JSONObject jo=XML.toJSONObject(writer.toString());
     	JSONArray ja=jo.getJSONArray("tw-patent-grant");
     	System.out.print(ja.toString(2));
-    	System.out.print("this file length=>"+ja.length()+"/n");
     	
 //    	for(int i=0;i<nl.getLength();i++) {
 //    		Node node=nl.item(i);
